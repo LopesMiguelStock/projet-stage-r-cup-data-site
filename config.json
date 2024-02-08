@@ -1,0 +1,10 @@
+{
+   "url": "https://www.mipimaj.fr/",
+   "balise": "div",
+   "class": "",
+   "id": "monter-son-pc",
+   "find_all_class_or_id": "yes",
+   "url_proxy": "https://corsproxy.io/?",
+   "proxy": "no",
+   "folder": "test"
+}
