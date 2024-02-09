@@ -10,8 +10,49 @@ import os
 import glob
 import uuid
 import datetime
+import argparse
 
-def main():
+class Color:
+   RED = '\033[91m'
+   BLUE = '\033[94m'
+   GREEN = '\033[92m'
+   PURPLE = '\033[95m'
+   CYAN = '\033[96m'
+   END = '\033[0m'
+
+# Ajout de la fonction pour gérer les arguments de la ligne de commande
+def handle_args():
+    print("")
+    parser = argparse.ArgumentParser(description=Color.GREEN + "Ce script permet de récupérer un point précis d'une page web. " + Color.END + Color.RED + "Attention à selectionner soit l'id ou la classe mais pas les deux en même temps !" + Color.END +
+"\n" + Color.BLUE + "Pour modifier la configuration aller dans le fichier config.json ou utiliser les commandes ci-dessous (modifie aussi le fichier config.json)" + Color.END, formatter_class=argparse.RawTextHelpFormatter)
+    parser.add_argument("-u", "--url", metavar='\b', help=Color.CYAN + 'URL à utiliser. Exemple : "https://exemple.com/"' + Color.END)
+    parser.add_argument("-t", "--tag", metavar='\b', help=Color.PURPLE + 'Balise HTML à utiliser. Exemple : "div" ou "span", etc' + Color.END)
+    parser.add_argument("-c", "--class_name", metavar='\b', help=Color.CYAN + 'Classe CSS à utiliser. Exemple : "maClass"' + Color.END)
+    parser.add_argument("-i", "--id", metavar='\b', help=Color.PURPLE + 'ID HTML à utiliser. Exemple : "monID"' + Color.END)
+    parser.add_argument("-a", "--all", metavar='\b', help=Color.CYAN + 'Trouver toutes les classes ou ID. Utilisez "yes" ou "no"' + Color.END)
+    parser.add_argument("-p", "--proxy", metavar='\b', help=Color.PURPLE + 'Utiliser un proxy. Utilisez "yes" ou "no"' + Color.END)
+    parser.add_argument("-x", "--proxy_url", metavar='\b', help=Color.CYAN + 'URL du proxy à utiliser. Exemple : "https://corsproxy.io/?" (optionnel)' + Color.END)
+    parser.add_argument("-d", "--directory", metavar='\b', help=Color.PURPLE + 'Dossier à utiliser. Exemple : "monDossier"' + Color.END)
+    args = parser.parse_args()
+    return args
+
+
+def update_config(args):
+    with open('config.json', 'r+') as file:
+        data = json.load(file)
+        if args.url: data['url'] = args.url
+        if args.tag: data['balise'] = args.tag
+        if args.class_name: data['class'] = args.class_name
+        if args.id: data['id'] = args.id
+        if args.all: data['find_all_class_or_id'] = args.all
+        if args.proxy: data['proxy'] = args.proxy
+        if args.directory: data['folder'] = args.directory
+        if args.proxy_url: data['url_proxy'] = args.proxy_url
+        file.seek(0)
+        json.dump(data, file, indent=4)
+        file.truncate()
+
+def search():
     # Configuration des options de Chrome
     options = Options()
     options.add_argument('--headless')
@@ -44,8 +85,6 @@ def main():
 
     # Récupération du code source de la page
     resp = driver.page_source 
-
-    pyperclip.copy(resp)
 
     # Fermeture du navigateur
     driver.close() 
@@ -98,6 +137,11 @@ def create_new_file(content, folder_name, url, last_file=None):
     with open(new_file, 'w') as f:
         json.dump(data, f, indent=4)
         print(f"Création du fichier : {new_file}")
+
+def main():
+    args = handle_args()
+    update_config(args)
+    search()
 
 if __name__ == "__main__":
     main()
